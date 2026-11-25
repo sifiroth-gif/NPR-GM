@@ -1,0 +1,54 @@
+name: R4 public baseline (24 cases)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/model-baseline.yml']
+permissions:
+  contents: read
+concurrency:
+  group: npr-gm-model-baseline
+  cancel-in-progress: false
+jobs:
+  model-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Record machine
+        run: python -m npr_gm.hardware
+      - name: Fetch verified runtime and model
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/npr-gm-runtime"
+          cd "$RUNNER_TEMP/npr-gm-runtime"
+          curl --fail --location --retry 2 --max-time 120 -o llama.tar.gz https://github.com/ggml-org/llama.cpp/releases/download/b12678/llama-b12678-bin-ubuntu-x64.tar.gz
+          echo '6ab90945ce1190484b060c74ba9e5bda918c7d2f05559c6d2d4e40d9c1ffd904  llama.tar.gz' | sha256sum -c -
+          tar xzf llama.tar.gz
+          curl --fail --location --retry 2 --max-time 360 -o model.gguf 'https://huggingface.co/ggml-org/Qwen3.5-4B-GGUF/resolve/8d43d974efc48399cb58957ad49c8b26bf5a109c/Qwen3.5-4B-Q4_K_M.gguf'
+          echo '217002fa8008ef4fc6d548353a3aebef055a96e6ff8e0e2c0953ef8254a89c14  model.gguf' > model.sha
+          test "$(stat -c %s model.gguf)" = 3032091584
+          echo 'HF revision: 8d43d974efc48399cb58957ad49c8b26bf5a109c'
+          sha256sum -c model.sha
+      - name: Run 24 public synthetic cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/npr-gm-runtime"
+          server="$(find "$d" -type f -name llama-server -print -quit)"
+          test -n "$server"
+          export LD_LIBRARY_PATH="$(dirname "$server"):${LD_LIBRARY_PATH:-}"
+          "$server" --version
+          "$server" -m "$d/model.gguf" --host 127.0.0.1 --port 8080 -c 4096 -np 1 -t 4 -ngl 0 --jinja >"$d/server.log" 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then break; fi
+            if ! kill -0 "$pid" 2>/dev/null; then tail -30 "$d/server.log"; exit 1; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8080/health >/dev/null
+          python -m npr_gm.smoke --model Qwen3.5-4B-Q4_K_M --cases E01 E02 E03 E04 E05 E06 E07 E08 E09 E10 E11 E12 E13 E14 E15 E16 E17 E18 E19 E20 E21 E22 E23 E24 --max-tokens 384 --timeout 180
