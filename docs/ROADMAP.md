@@ -11,3 +11,5 @@
 R3-K: отдельный обязательный поток — [KNOWLEDGE_CORPUS.md](KNOWLEDGE_CORPUS.md), 6 дисциплин, K0 подготовлен, K1–K4 открыты. C11 — доменная проверка R4. R1 расширен [CLASSICAL_FOUNDATIONS.md](CLASSICAL_FOUNDATIONS.md). Следующий основной этап остаётся R2; при блокере вычислений выполнять R3-K и R3.
 
 R2: выполнить/проверить одноразовый публичный CPU-smoke, не путать с baseline телефона. Для целевого устройства запустить hardware. При блокере перейти к R3/K1: локальная разметка и расширение проверенного научного корпуса; K2 уже имеет простой поиск, K3/holdout не начаты.
+
+R3 контрольная точка: [CORPUS_PIPELINE.md](CORPUS_PIPELINE.md) готов; 322 архивных пары проверены read-only, 24 synthetic draft, 60 knowledge draft. Следующий пакет — закрытый holdout и фактическая разметка; не обучать ни на черновиках, ни на public regression. 39/39 unit tests, 24/24 fixture, 60 draft cards/6 domains/0 structural errors; CI 45660666525 SUCCESS.
