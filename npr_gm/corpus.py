@@ -145,6 +145,7 @@ def review_export(rows, split_map, smoke_cases):
             raise ValueError("Missing mandatory competence review")
         hard=row.get("hard_results",{})
         if any(hard.get(k)!="pass" for k in set(app)&HARD): raise ValueError("Hard gate failed or unknown")
+        if "C11" in app and hard.get("C11")!="pass": raise ValueError("Domain-critical review missing or failed")
         scores=row.get("soft_scores",{})
         if any(type(scores.get(k)) is not int or not 0<=scores[k]<=4 for k in set(app)&SOFT):
             raise ValueError("Missing applicable soft score")

@@ -61,3 +61,9 @@ class CorpusTests(unittest.TestCase):
     def test_source_duplicate(self):
         x=self.reviewed();y=copy.deepcopy(x);y["chosen"]="Другой ответ.";y["id"]="s"
         with self.assertRaises(ValueError): review_export([x,y],{"g":"train"},load_cases())
+
+    def test_biomedical_critical_gate(self):
+        x=self.reviewed();x["applicable_ids"].append("C11");x["soft_scores"]["C11"]=4
+        with self.assertRaises(ValueError): review_export([x],{"g":"train"},load_cases())
+        x["hard_results"]["C11"]="pass"
+        self.assertEqual(len(review_export([x],{"g":"train"},load_cases())),1)
