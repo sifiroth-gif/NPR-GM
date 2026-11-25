@@ -1,0 +1,65 @@
+name: Bounded CPU model smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/model-smoke.yml']
+permissions:
+  contents: read
+concurrency:
+  group: npr-gm-model-smoke
+  cancel-in-progress: false
+jobs:
+  model-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Record machine
+        run: python -m npr_gm.hardware
+      - name: Fetch verified runtime and model
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/npr-gm-runtime"
+          cd "$RUNNER_TEMP/npr-gm-runtime"
+          curl --fail --location --retry 2 --max-time 120 -o llama.tar.gz https://github.com/ggml-org/llama.cpp/releases/download/b12678/llama-b12678-bin-ubuntu-x64.tar.gz
+          echo '6ab90945ce1190484b060c74ba9e5bda918c7d2f05559c6d2d4e40d9c1ffd904  llama.tar.gz' | sha256sum -c -
+          tar xzf llama.tar.gz
+          curl --fail --location --retry 2 --max-time 60 -o model-meta.json 'https://huggingface.co/api/models/ggml-org/Qwen3.5-4B-GGUF?blobs=true'
+          python - <<'PY'
+          import json,re
+          d=json.load(open('model-meta.json'))
+          s=d['sha']
+          assert re.fullmatch(r'[0-9a-f]{40}',s)
+          f=next(x for x in d['siblings'] if x['rfilename']=='Qwen3.5-4B-Q4_K_M.gguf')
+          digest=f['lfs']['sha256']
+          assert re.fullmatch(r'[0-9a-f]{64}',digest)
+          assert 0 < f['lfs']['size'] < 4_000_000_000
+          open('model.url','w').write('https://huggingface.co/ggml-org/Qwen3.5-4B-GGUF/resolve/'+s+'/'+f['rfilename'])
+          open('model.sha','w').write(digest+'  model.gguf\n')
+          print('HF revision:',s,'SHA256:',digest,'bytes:',f['lfs']['size'])
+          PY
+          curl --fail --location --retry 2 --max-time 360 -o model.gguf "$(cat model.url)"
+          sha256sum -c model.sha
+      - name: Run three public synthetic cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/npr-gm-runtime"
+          server="$(find "$d" -type f -name llama-server -print -quit)"
+          test -n "$server"
+          export LD_LIBRARY_PATH="$(dirname "$server"):${LD_LIBRARY_PATH:-}"
+          "$server" --version
+          "$server" -m "$d/model.gguf" --host 127.0.0.1 --port 8080 -c 4096 -np 1 -t 4 -ngl 0 --jinja >"$d/server.log" 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then break; fi
+            if ! kill -0 "$pid" 2>/dev/null; then tail -30 "$d/server.log"; exit 1; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8080/health >/dev/null
+          python -m npr_gm.smoke --model Qwen3.5-4B-Q4_K_M --cases E01 E09 E19 --max-tokens 384 --timeout 180

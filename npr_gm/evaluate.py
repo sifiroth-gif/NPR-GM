@@ -56,11 +56,13 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         raise ValueError('Redirects forbidden')
 
-def generate(case, endpoint, model, timeout):
+def generate(case, endpoint, model, timeout, *, max_tokens=1024, thinking=None):
     u=urlsplit(endpoint)
     if u.scheme != 'http' or u.hostname not in ('127.0.0.1','::1') or u.username or u.password or u.query or u.fragment or u.path.rstrip('/') != '/v1/chat/completions':
         raise ValueError('Only local llama.cpp chat endpoint allowed')
-    payload={'model':model,'messages':messages(case),'temperature':0.2,'seed':42,'max_tokens':1024,'stream':False}
+    payload={'model':model,'messages':messages(case),'temperature':0.2,'seed':42,'max_tokens':max_tokens,'stream':False}
+    if thinking is not None:
+        payload['chat_template_kwargs'] = {'enable_thinking': thinking}
     req=urllib.request.Request(endpoint, data=json.dumps(payload,ensure_ascii=False).encode(), headers={'Content-Type':'application/json'}, method='POST')
     opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
     start=time.monotonic()
