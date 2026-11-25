@@ -1,0 +1,88 @@
+{
+  "version": "0.1",
+  "checked_on": "2026-11-25",
+  "policy": "Public access is not permission to redistribute or train. No bulk ingestion. Reference-only and conditional items excluded from automatic training imports. Verify exact edition, page, rights and permitted use before ingestion.",
+  "sources": [
+    {
+      "id": "BIO-S01",
+      "domain": "Анатомия и физиология",
+      "title": "OpenStax, Anatomy and Physiology 2e",
+      "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/preface",
+      "rights": "CC BY-NC-SA 4.0 (текущая страница издателя)",
+      "status": "reference_only",
+      "scope": "Системная анатомия, гистология, физиология органов, тканевое восстановление"
+    },
+    {
+      "id": "BIO-S02",
+      "domain": "Анатомия и физиология",
+      "title": "Biga et al., Anatomy & Physiology 2e, Oregon State University, 2025",
+      "url": "https://open.oregonstate.education/anatomy2e/",
+      "rights": "CC BY-SA 4.0, кроме отдельно отмеченных материалов",
+      "status": "conditional_review",
+      "scope": "Альтернативный открытый учебник, проверить лицензии глав и изображений отдельно"
+    },
+    {
+      "id": "BIO-S03",
+      "domain": "Нейрофизиология",
+      "title": "Casey Henley, Foundations of Neuroscience, 2021",
+      "url": "https://openbooks.lib.msu.edu/neuroscience/",
+      "rights": "CC BY-NC-SA 4.0, кроме исключений",
+      "status": "reference_only",
+      "scope": "Мембранные потенциалы, синапсы, рецепторы, сенсорные системы"
+    },
+    {
+      "id": "BIO-S04",
+      "domain": "Нейрофизиология",
+      "title": "Purves et al., Neuroscience, 2nd ed., 2001",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK10799/",
+      "rights": "Copyright Sinauer Associates; доступ не означает разрешение на переработку",
+      "status": "reference_only",
+      "scope": "Дополнительная проверка фундаментальных механизмов; устаревшие клинические сведения исключать"
+    },
+    {
+      "id": "BIO-S05",
+      "domain": "Психофизиология",
+      "title": "OpenStax, Psychology 2e",
+      "url": "https://openstax.org/books/psychology-2e/pages/preface",
+      "rights": "CC BY-NC-SA 4.0 (текущая страница издателя)",
+      "status": "reference_only",
+      "scope": "Биологическая психология, сон, восприятие, стресс"
+    },
+    {
+      "id": "BIO-S06",
+      "domain": "Медицина",
+      "title": "MedlinePlus, NLM/NIH",
+      "url": "https://medlineplus.gov/about/using/usingcontent/",
+      "rights": "Смешанные права: отдельные разделы public domain, сторонние материалы защищены",
+      "status": "conditional_review",
+      "scope": "Справочные сведения о болезнях, восстановлении и признаках; проверка каждой страницы"
+    },
+    {
+      "id": "BIO-S07",
+      "domain": "Медицина",
+      "title": "StatPearls, NCBI Bookshelf",
+      "url": "https://www.ncbi.nlm.nih.gov/sites/books/NBK430685/",
+      "rights": "CC BY-NC-ND 4.0 по записи издания",
+      "status": "reference_only",
+      "scope": "Клиническая сверка; не копировать и не преобразовывать текст в датасет"
+    },
+    {
+      "id": "BIO-S08",
+      "domain": "Биология",
+      "title": "OpenStax, Biology 2e",
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "rights": "CC BY-NC-SA 4.0 (текущая страница издателя)",
+      "status": "reference_only",
+      "scope": "Клетки, биохимия, генетика, эволюция, экология"
+    },
+    {
+      "id": "BIO-S09",
+      "domain": "Правила использования",
+      "title": "NCBI Bookshelf Copyright Notice",
+      "url": "https://www.ncbi.nlm.nih.gov/sites/books/about/copyright/",
+      "rights": "Право определяется конкретным документом",
+      "status": "policy",
+      "scope": "Не считать все документы NCBI общественным достоянием"
+    }
+  ]
+}
