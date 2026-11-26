@@ -33,3 +33,20 @@ class TrainTests(unittest.TestCase):
         with self.assertRaises(ValueError): validate_args(a)
     def test_local_input(self):
         with self.assertRaises(ValueError): local_input("data/synthetic_train_draft.jsonl")
+
+    def test_multi_turn_mask(self):
+        class Tokenizer:
+            def apply_chat_template(self,messages,**kwargs):
+                ids=[]
+                for m in messages:
+                    ids += [{"system":1,"user":2,"assistant":3}[m["role"]],int(m["content"]),9]
+                if kwargs["add_generation_prompt"]:ids.append(3)
+                return ids
+        messages=[{"role":r,"content":str(i+10)} for i,r in enumerate(["system","user","assistant","user","assistant"])]
+        x=encode_messages(Tokenizer(),messages,100)
+        self.assertEqual(x["labels"],[-100]*7+[12,9]+[-100]*4+[14,9])
+    def test_bad_role_order(self):
+        with self.assertRaises(ValueError):encode_messages(FakeTokenizer(),[{"role":"system"},{"role":"assistant"},{"role":"user"}],100)
+    def test_structured_smoke_mixing(self):
+        a=self.args();a.structured=True
+        with self.assertRaises(ValueError):validate_args(a)

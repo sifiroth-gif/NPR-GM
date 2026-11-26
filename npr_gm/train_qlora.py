@@ -20,25 +20,40 @@ def local_input(path):
         raise ValueError("Reviewed training inputs must be under private_data")
     return path
 
-def prepare_rows(reviewed, split_map):
+def prepare_rows(reviewed, split_map, *, structured=False):
     reviewed=local_input(reviewed); split_map=local_input(split_map)
     rows=[json.loads(s) for s in reviewed.read_text(encoding="utf-8").splitlines() if s.strip()]
     mapping=json.loads(split_map.read_text(encoding="utf-8"))
+    if structured:
+        from .structured import export_reviewed
+        return export_reviewed(rows,mapping,load_cases())
     return review_export(rows,mapping,load_cases())
 
 def encode_messages(tokenizer, messages, max_length):
-    # Qwen chat template is authoritative. Never truncate a target silently.
-    if [m["role"] for m in messages] != ["system","user","assistant"]:
-        raise ValueError("Expected one reviewed turn")
-    prefix=tokenizer.apply_chat_template(messages[:-1],tokenize=True,add_generation_prompt=True,enable_thinking=False,return_dict=False)
-    full=tokenizer.apply_chat_template(messages,tokenize=True,add_generation_prompt=False,enable_thinking=False,return_dict=False)
-    if not isinstance(prefix,list) or not isinstance(full,list) or full[:len(prefix)]!=prefix:
-        raise ValueError("Chat-template prefix mismatch; verify assistant masking")
+    # All assistant turns are targets, all host/tool results are masked.
+    roles=[m["role"] for m in messages]
+    if len(roles)<3 or len(roles)%2!=1 or roles[0]!="system" or roles[1:]!=["user","assistant"]*((len(roles)-1)//2):
+        raise ValueError("Expected system followed by user/assistant pairs")
+    def render(part,generation):
+        ids=tokenizer.apply_chat_template(part,tokenize=True,add_generation_prompt=generation,enable_thinking=False,return_dict=False)
+        if not isinstance(ids,list) or not all(type(x) is int for x in ids):
+            raise ValueError("Tokenizer must return flat token IDs")
+        return ids
+    full=render(messages,False)
     if len(full)>max_length:
         raise ValueError("Example exceeds max_length; shorten reviewed context, never truncate")
-    if len(full)<=len(prefix):
-        raise ValueError("No assistant target")
-    return {"input_ids":full,"attention_mask":[1]*len(full),"labels":[-100]*len(prefix)+full[len(prefix):]}
+    labels=[-100]*len(full)
+    previous_end=0
+    for i,role in enumerate(roles):
+        if role!="assistant":continue
+        prefix=render(messages[:i],True)
+        completed=full if i==len(roles)-1 else render(messages[:i+1],False)
+        if full[:len(prefix)]!=prefix or full[:len(completed)]!=completed or len(prefix)<previous_end or len(completed)<=len(prefix):
+            raise ValueError("Chat-template prefix mismatch; verify assistant masking")
+        labels[len(prefix):len(completed)]=full[len(prefix):len(completed)]
+        previous_end=len(completed)
+    if not any(x!=-100 for x in labels):raise ValueError("No assistant target")
+    return {"input_ids":full,"attention_mask":[1]*len(full),"labels":labels}
 
 def collate(rows,pad_id):
     size=max(len(r["input_ids"]) for r in rows)
@@ -58,6 +73,8 @@ def validate_args(a):
         raise ValueError("Smoke limited to 3 optimizer steps, accumulation 1")
     if not a.smoke and (not a.reviewed or not a.split_map):
         raise ValueError("Reviewed data and explicit group split required")
+    if a.smoke and getattr(a,'structured',False):
+        raise ValueError('Structured pilot is separate from tooling smoke')
     if a.smoke and (a.reviewed or a.split_map):
         raise ValueError("Do not mix fixture and corpus")
     if not re.fullmatch("[a-f0-9]{40}",a.revision):
@@ -133,6 +150,7 @@ def run(a,rows):
     receipt={"status":"smoke_only_not_for_deployment" if a.smoke else "pilot_trained_not_evaluated",
         "model":a.model,"revision":a.revision,"steps":a.steps,"accum":a.accum,"seed":a.seed,"lr":a.lr,
         "max_length":a.max_length,"examples":len(encoded),"losses":losses,"dtype":str(dtype),
+        "training_contract":"structured_sandbox_1" if a.structured else "prose_or_smoke",
         "gpu":torch.cuda.get_device_name(),"vram_total":total,"vram_free_start":free,
         "peak_allocated":torch.cuda.max_memory_allocated(),"peak_reserved":torch.cuda.max_memory_reserved(),
         "trainable_parameters":sum(p.numel() for p in params),"target_modules":targets,
@@ -146,10 +164,11 @@ def main():
     p.add_argument("--model",default="Qwen/Qwen3.5-4B")
     p.add_argument("--revision",required=True);p.add_argument("--reviewed",type=Path);p.add_argument("--split-map",type=Path)
     p.add_argument("--output",type=Path,required=True);p.add_argument("--smoke",action="store_true");p.add_argument("--run",action="store_true")
+    p.add_argument("--structured",action="store_true",help="Use separately reviewed structured sandbox dialogues")
     p.add_argument("--max-length",type=int,default=512);p.add_argument("--steps",type=int,default=3);p.add_argument("--accum",type=int,default=1)
     p.add_argument("--lr",type=float,default=1e-4);p.add_argument("--seed",type=int,default=42)
     a=p.parse_args();validate_args(a)
-    rows=smoke_messages() if a.smoke else prepare_rows(a.reviewed,a.split_map)
+    rows=smoke_messages() if a.smoke else prepare_rows(a.reviewed,a.split_map,structured=a.structured)
     if "private_data" not in a.output.resolve().parts: raise ValueError("Output must remain private")
     print(json.dumps({"mode":"smoke" if a.smoke else "reviewed_pilot","examples":len(rows),"run":a.run,"steps":a.steps,"max_length":a.max_length}))
     if a.run: run(a,rows)

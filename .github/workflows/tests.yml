@@ -15,3 +15,4 @@ jobs:
       - run: python -m npr_gm.evaluate --fixture --output runs/fixture.jsonl
       - run: python -m npr_gm.knowledge
       - run: python -m npr_gm.hardware
+      - run: python -m npr_gm.structured --check-drafts
