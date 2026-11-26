@@ -5,6 +5,7 @@ import json
 import statistics
 from pathlib import Path
 from .structured import load_drafts,replay
+from .prefetch_corpus import replay_prefetch,eligible_drafts,load_ledger
 from .train_qlora import encode_messages,encode_targets,smoke_messages
 
 MODEL="Qwen/Qwen3.5-4B"
@@ -38,13 +39,27 @@ def main():
                 lengths.append(len(sample["input_ids"]));target_lengths.append(len(ids))
         except (ValueError,TypeError) as e:
             failures.append(type(e).__name__+":"+str(e))
+    prefetch_rows=[replay_prefetch(r) for r in eligible_drafts(load_drafts(),load_ledger())]
+    pf_lengths=[];pf_target_lengths=[];pf_failures=[]
+    for row in prefetch_rows:
+        try:
+            samples=encode_targets(tok,row,2048)
+            expected=[m["content"].strip() for m in row if m["role"]=="assistant"]
+            if len(samples)!=len(expected):raise ValueError("target_count")
+            for sample,content in zip(samples,expected):
+                ids=[x for x in sample["labels"] if x!=-100]
+                decoded=tok.decode(ids,skip_special_tokens=False,clean_up_tokenization_spaces=False)
+                if decoded.rstrip("\n")!=content+"<|im_end|>":raise ValueError("target_decode_mismatch")
+                pf_lengths.append(len(sample["input_ids"]));pf_target_lengths.append(len(ids))
+        except (ValueError,TypeError) as e:
+            pf_failures.append(type(e).__name__+":"+str(e))
     smoke=encode_targets(tok,smoke_messages()[0]["messages"],512)
     result={"model":MODEL,"revision":REVISION,"packages":{k:importlib.metadata.version(k) for k in ("transformers","tokenizers","huggingface-hub","jinja2")},
         "file_sha256":hashes,"dialogues":len(rows),"legacy_full_mask_pass":legacy_pass,"legacy_full_mask_fail":legacy_fail,
         "separate_targets":len(lengths),"target_lengths_min_max":[min(target_lengths),max(target_lengths)] if target_lengths else [],
         "input_min_median_max":[min(lengths),statistics.median(lengths),max(lengths)] if lengths else [],
         "over_512":sum(n>512 for n in lengths),"over_1024":sum(n>1024 for n in lengths),
-        "smoke_input_tokens":len(smoke[0]["input_ids"]),"failures":failures,"weights_loaded":False,"training":False}
+        "prefetch":{"dialogues":len(prefetch_rows),"targets":len(pf_lengths),"input_min_median_max":[min(pf_lengths),statistics.median(pf_lengths),max(pf_lengths)] if pf_lengths else [],"target_lengths_min_max":[min(pf_target_lengths),max(pf_target_lengths)] if pf_target_lengths else [],"over_512":sum(n>512 for n in pf_lengths),"failures":pf_failures},"smoke_input_tokens":len(smoke[0]["input_ids"]),"failures":failures,"weights_loaded":False,"training":False}
     print(json.dumps(result,ensure_ascii=False),flush=True)
-    if failures or len(lengths)!=32:raise SystemExit(1)
+    if failures or len(lengths)!=32 or pf_failures or len(pf_lengths)!=15:raise SystemExit(1)
 if __name__=="__main__":main()

@@ -4,7 +4,8 @@ import collections
 import statistics
 import time
 from .sandbox import Sandbox, Source, Outcome, ContractError, encode, parse_request
-from .transport import SYSTEM, local_exchange
+from .transport import local_exchange
+from .prefetch_context import initial_messages
 
 # Each source contains distinct information absent from outcome labels/context.
 # Fixed before inference; no use of historical smoke, training drafts or private holdout.
@@ -29,20 +30,7 @@ def fixture(case):
 
 def run_arm(engine,turn,exchange,*,prefetch):
     """Same read budget and validation in both arms. No commit, no automatic citations."""
-    context=engine.context(turn)
-    for outcome in context["authorized_outcomes"]:
-        del outcome["description"]
-    required=sorted({i for o in context["authorized_outcomes"] for i in o["required_sources"]})
-    prefetched=[]
-    if prefetch:
-        for i in required:
-            result=engine.request(turn,encode({"tool":"read_source","id":i}))
-            if result.get("status")!="found":
-                raise ContractError("prefetch_unavailable")
-            prefetched.append(result)
-    context["prefetched_sources"]=prefetched
-    messages=[{"role":"system","content":SYSTEM+" Все обязательные ID выбранного исхода должны быть в facts_used. Предзагруженные found-источники считаются прочитанными. Описания исходов скрыты; не выдумывай сведения."},
-              {"role":"user","content":encode(context)}]
+    context,required,prefetched,messages=initial_messages(engine,turn,prefetch=prefetch)
     calls=rounds=unavailable=0
     start=time.monotonic()
     stage="exchange"

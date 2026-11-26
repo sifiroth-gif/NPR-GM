@@ -1,4 +1,4 @@
-name: Qwen official tokenizer preflight
+name: Qwen official tokenizer preflight (legacy and host prefetch)
 on:
   workflow_dispatch:
   push:
