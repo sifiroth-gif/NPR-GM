@@ -1,4 +1,4 @@
-"""Read-only lexical retrieval for draft knowledge cards; not clinical advice."""
+"""Human editorial lexical lookup; separately guarded model-facing retrieval."""
 import argparse
 import json
 import re
@@ -29,6 +29,21 @@ def retrieve(query, cards, domain=None, scope=None, limit=3, allow_draft=False):
             results.append(result)
     return sorted(results,key=lambda x:(-x["lexical_score"],x["id"]))[:limit]
 
+def retrieve_for_model(query, registry, cards, domain=None, scope=None, limit=3):
+    """Fail closed: neither public access nor a reviewed status implies AI permission.
+    This is an interface gate, not evidence that any supplied permission is authentic.
+    Only trusted host may supply reviewed local records; never model-generated flags.
+    """
+    sources={s["id"]:s for s in registry["sources"]}
+    eligible=[]
+    for c in cards:
+        s=sources.get(c.get("source_id"),{})
+        if c.get("status")!="reviewed_reference":continue
+        if c.get("model_use")!="approved_for_model_retrieval" or s.get("model_use")!="approved_for_model_retrieval":continue
+        if not all(isinstance(x,str) and x.strip() for x in (s.get("permission_ref"),c.get("permission_ref"),c.get("expert_reviewer_id"),c.get("review_date"))):continue
+        eligible.append(c)
+    return retrieve(query,eligible,domain,scope,limit,allow_draft=False)
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("query")
@@ -36,9 +51,11 @@ def main():
     p.add_argument("--scope")
     p.add_argument("--limit",type=int,default=3)
     p.add_argument("--allow-draft",action="store_true")
+    p.add_argument("--model-facing",action="store_true",help="Require explicit permission and expert review; never returns drafts")
     a=p.parse_args()
+    if a.model_facing and a.allow_draft:p.error("Drafts cannot be model-facing")
     registry,cards=load()
     if validate(registry,cards): raise SystemExit("Knowledge corpus integrity failure")
-    results=retrieve(a.query,cards,a.domain,a.scope,a.limit,a.allow_draft)
-    print(json.dumps({"status":"found" if results else "unknown","cards":results,"draft_mode":a.allow_draft},ensure_ascii=False,indent=2))
+    results=retrieve_for_model(a.query,registry,cards,a.domain,a.scope,a.limit) if a.model_facing else retrieve(a.query,cards,a.domain,a.scope,a.limit,a.allow_draft)
+    print(json.dumps({"status":"found" if results else "unknown","cards":results,"draft_mode":a.allow_draft,"audience":"model" if a.model_facing else "human_editorial"},ensure_ascii=False,indent=2))
 if __name__=="__main__":main()

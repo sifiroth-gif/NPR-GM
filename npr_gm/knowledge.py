@@ -20,7 +20,9 @@ def validate(registry, cards):
         else:
             u, root = urlsplit(c["url"]), urlsplit(by_id[c["source_id"]]["url"])
             if u.scheme != "https" or u.hostname != root.hostname: errors.append(c["id"] + ":source_host")
-        if c["train_eligible"] is not False or c["use"] != "retrieval_pilot_only" or c["status"] != "draft_reference": errors.append(c["id"] + ":unreviewed_training")
+        if c["train_eligible"] is not False or c["use"] != "human_reference_review_only" or c["status"] != "draft_reference": errors.append(c["id"] + ":unreviewed_training")
+        if c.get("model_use") not in {"blocked_pending_permission","pending_page_rights_and_expert_review"}: errors.append(c["id"] + ":draft_model_use")
+        if c["source_id"] in by_id and by_id[c["source_id"]].get("model_use")=="blocked_pending_permission" and c.get("model_use")!="blocked_pending_permission": errors.append(c["id"] + ":source_permission_conflict")
         if not all(isinstance(c[k],str) and c[k].strip() for k in ("topic","fact","application","limitations","review","origin")): errors.append(c["id"] + ":missing_content")
     return errors
 def main():

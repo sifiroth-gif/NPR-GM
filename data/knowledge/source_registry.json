@@ -1,7 +1,7 @@
 {
-  "version": "0.1",
-  "checked_on": "2026-11-25",
-  "policy": "Public access is not permission to redistribute or train. No bulk ingestion. Reference-only and conditional items excluded from automatic training imports. Verify exact edition, page, rights and permitted use before ingestion.",
+  "version": "0.2",
+  "checked_on": "2026-11-26",
+  "policy": "Human bibliographic review only by default. No automatic AI ingestion or training. Model-facing retrieval requires explicit affirmative source AND card permission, expert-reviewed card, and local documented evidence of permission and independent review. OpenStax current AI notice explicitly requires permission; do not ingest or extend using those editions pending resolution. Facts may be independently sourced from eligible primary material; no legal determination about all independently authored factual summaries.",
   "sources": [
     {
       "id": "BIO-S01",
@@ -10,7 +10,11 @@
       "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/preface",
       "rights": "CC BY-NC-SA 4.0 (текущая страница издателя)",
       "status": "reference_only",
-      "scope": "Системная анатомия, гистология, физиология органов, тканевое восстановление"
+      "scope": "Системная анатомия, гистология, физиология органов, тканевое восстановление",
+      "model_use": "blocked_pending_permission",
+      "ai_notice_checked_on": "2026-11-26",
+      "ai_notice": "Publisher explicitly requests permission for LLM training and other generative-AI ingestion. Project conservatively blocks model-facing use pending permission or independent provenance/legal review.",
+      "ai_notice_url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/4-6-tissue-injury-and-aging"
     },
     {
       "id": "BIO-S02",
@@ -19,7 +23,8 @@
       "url": "https://open.oregonstate.education/anatomy2e/",
       "rights": "CC BY-SA 4.0, кроме отдельно отмеченных материалов",
       "status": "conditional_review",
-      "scope": "Альтернативный открытый учебник, проверить лицензии глав и изображений отдельно"
+      "scope": "Альтернативный открытый учебник, проверить лицензии глав и изображений отдельно",
+      "model_use": "pending_page_rights_and_expert_review"
     },
     {
       "id": "BIO-S03",
@@ -28,7 +33,8 @@
       "url": "https://openbooks.lib.msu.edu/neuroscience/",
       "rights": "CC BY-NC-SA 4.0, кроме исключений",
       "status": "reference_only",
-      "scope": "Мембранные потенциалы, синапсы, рецепторы, сенсорные системы"
+      "scope": "Мембранные потенциалы, синапсы, рецепторы, сенсорные системы",
+      "model_use": "pending_page_rights_and_expert_review"
     },
     {
       "id": "BIO-S04",
@@ -37,7 +43,8 @@
       "url": "https://www.ncbi.nlm.nih.gov/books/NBK10799/",
       "rights": "Copyright Sinauer Associates; доступ не означает разрешение на переработку",
       "status": "reference_only",
-      "scope": "Дополнительная проверка фундаментальных механизмов; устаревшие клинические сведения исключать"
+      "scope": "Дополнительная проверка фундаментальных механизмов; устаревшие клинические сведения исключать",
+      "model_use": "pending_page_rights_and_expert_review"
     },
     {
       "id": "BIO-S05",
@@ -46,7 +53,11 @@
       "url": "https://openstax.org/books/psychology-2e/pages/preface",
       "rights": "CC BY-NC-SA 4.0 (текущая страница издателя)",
       "status": "reference_only",
-      "scope": "Биологическая психология, сон, восприятие, стресс"
+      "scope": "Биологическая психология, сон, восприятие, стресс",
+      "model_use": "blocked_pending_permission",
+      "ai_notice_checked_on": "2026-11-26",
+      "ai_notice": "Publisher explicitly requests permission for LLM training and other generative-AI ingestion. Project conservatively blocks model-facing use pending permission or independent provenance/legal review.",
+      "ai_notice_url": "https://openstax.org/books/psychology-2e/pages/4-1-what-is-consciousness"
     },
     {
       "id": "BIO-S06",
@@ -55,7 +66,8 @@
       "url": "https://medlineplus.gov/about/using/usingcontent/",
       "rights": "Смешанные права: отдельные разделы public domain, сторонние материалы защищены",
       "status": "conditional_review",
-      "scope": "Справочные сведения о болезнях, восстановлении и признаках; проверка каждой страницы"
+      "scope": "Справочные сведения о болезнях, восстановлении и признаках; проверка каждой страницы",
+      "model_use": "pending_page_rights_and_expert_review"
     },
     {
       "id": "BIO-S07",
@@ -64,7 +76,8 @@
       "url": "https://www.ncbi.nlm.nih.gov/sites/books/NBK430685/",
       "rights": "CC BY-NC-ND 4.0 по записи издания",
       "status": "reference_only",
-      "scope": "Клиническая сверка; не копировать и не преобразовывать текст в датасет"
+      "scope": "Клиническая сверка; не копировать и не преобразовывать текст в датасет",
+      "model_use": "pending_page_rights_and_expert_review"
     },
     {
       "id": "BIO-S08",
@@ -73,7 +86,11 @@
       "url": "https://openstax.org/books/biology-2e/pages/preface",
       "rights": "CC BY-NC-SA 4.0 (текущая страница издателя)",
       "status": "reference_only",
-      "scope": "Клетки, биохимия, генетика, эволюция, экология"
+      "scope": "Клетки, биохимия, генетика, эволюция, экология",
+      "model_use": "blocked_pending_permission",
+      "ai_notice_checked_on": "2026-11-26",
+      "ai_notice": "Publisher explicitly requests permission for LLM training and other generative-AI ingestion. Project conservatively blocks model-facing use pending permission or independent provenance/legal review.",
+      "ai_notice_url": "https://openstax.org/books/biology-2e/pages/5-introduction"
     },
     {
       "id": "BIO-S09",
@@ -82,7 +99,8 @@
       "url": "https://www.ncbi.nlm.nih.gov/sites/books/about/copyright/",
       "rights": "Право определяется конкретным документом",
       "status": "policy",
-      "scope": "Не считать все документы NCBI общественным достоянием"
+      "scope": "Не считать все документы NCBI общественным достоянием",
+      "model_use": "pending_page_rights_and_expert_review"
     }
   ]
 }
