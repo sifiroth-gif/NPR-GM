@@ -1,0 +1,183 @@
+{
+  "all_unchanged": true,
+  "pairs": {
+    "both": 1,
+    "prefetch_only": 5
+  },
+  "rows": [
+    {
+      "arm": "direct",
+      "case": "P01",
+      "elapsed_s": 25.177,
+      "host_reads": 0,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "preview",
+      "status": "unread_or_extra_citation",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "prefetch",
+      "case": "P01",
+      "elapsed_s": 18.214,
+      "host_reads": 1,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "complete",
+      "status": "valid",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "prefetch",
+      "case": "P02",
+      "elapsed_s": 20.806,
+      "host_reads": 2,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "complete",
+      "status": "valid",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "direct",
+      "case": "P02",
+      "elapsed_s": 15.89,
+      "host_reads": 0,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "preview",
+      "status": "unread_or_extra_citation",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "direct",
+      "case": "P03",
+      "elapsed_s": 25.393,
+      "host_reads": 0,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "preview",
+      "status": "unread_or_extra_citation",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "prefetch",
+      "case": "P03",
+      "elapsed_s": 15.509,
+      "host_reads": 1,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "complete",
+      "status": "valid",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "prefetch",
+      "case": "P04",
+      "elapsed_s": 20.018,
+      "host_reads": 2,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "complete",
+      "status": "valid",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "direct",
+      "case": "P04",
+      "elapsed_s": 17.091,
+      "host_reads": 0,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "preview",
+      "status": "unread_or_extra_citation",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "direct",
+      "case": "P05",
+      "elapsed_s": 17.655,
+      "host_reads": 0,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "complete",
+      "status": "valid",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "prefetch",
+      "case": "P05",
+      "elapsed_s": 12.986,
+      "host_reads": 0,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "complete",
+      "status": "valid",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "prefetch",
+      "case": "P06",
+      "elapsed_s": 16.004,
+      "host_reads": 1,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "complete",
+      "status": "valid",
+      "unavailable_reads": 0,
+      "unchanged": true
+    },
+    {
+      "arm": "direct",
+      "case": "P06",
+      "elapsed_s": 18.748,
+      "host_reads": 0,
+      "model_reads": 0,
+      "rounds": 1,
+      "stage": "preview",
+      "status": "unread_or_extra_citation",
+      "unavailable_reads": 0,
+      "unchanged": true
+    }
+  ],
+  "schema": "prefetch-diagnostic/1",
+  "semantic_review": false,
+  "summary": {
+    "direct": {
+      "host_reads": 0,
+      "median_elapsed_s": 18.201500000000003,
+      "model_reads": 0,
+      "n": 6,
+      "status_counts": {
+        "unread_or_extra_citation": 5,
+        "valid": 1
+      },
+      "valid": 1
+    },
+    "prefetch": {
+      "host_reads": 7,
+      "median_elapsed_s": 17.109,
+      "model_reads": 0,
+      "n": 6,
+      "status_counts": {
+        "valid": 6
+      },
+      "valid": 6
+    }
+  },
+  "training": false,
+  "workflow_run": 45888233551,
+  "code_commit": "46a27dfa0f312501686e7f4191183963e49dc923",
+  "model_revision": "8d43d974efc48399cb58957ad49c8b26bf5a109c",
+  "runtime_build": 12678
+}
