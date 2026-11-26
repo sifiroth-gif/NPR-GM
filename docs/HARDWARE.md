@@ -22,3 +22,8 @@ x86_64, cgroup RAM 4294967296 bytes (4 GiB), CPU quota 4, системная RAM
 | E09 | 11.810 | 215 | 91 | 0 |
 | E19 | 19.663 | 214 | 170 | 0 |
 3/3 ответов, 3/3 автоматические проверки, медиана 19.663 s. Реальный inference, не fixture. Raw scenes намеренно не опубликованы; ручная семантическая/художественная оценка не выполнена. Замеры полного времени включают обработку входа и генерацию; не измерены отдельно TTFT/decode, peak memory, нагрев. Это доказательство работоспособности цепочки на серверном CPU, не доказательство качества модели, пригодности Pixel или успешного обучения. Полный R4 и физический R2 остаются открыты. Повторять загрузку без необходимости не требуется.
+
+
+26.11.2026: full public baseline 45665035891 SUCCESS, 24/24 real responses, 23/24 automatic pass, E04 clock_range, median 14.309 s, min 9.752/max 22.439 s, no manual semantic review, no Pixel measurement. Same pinned GGUF/runtime, public regression only. R4 PARTIAL. Laptop reported Intel i7 8 cores, 32 GB RAM, RTX3060 8 GB (verify dedicated VRAM; NVIDIA Laptop 3060 reference 6 GB). R5 code prepared: bounded local NF4 LoRA pilot, assistant-only mask with fail-closed prefix check, smoke distinct from training, reviewed input gate, private receipts, no GPU CI, no actual training. 0 approved SFT. No laptop needed yet; next: structured tool interface and verified training corpus; then user runs nvidia-smi and environment smoke. See docs/QLORA_PILOT.md.
+
+Official NVIDIA specification: https://www.nvidia.com/en-eu/geforce/laptops/30-series/ . Owner's laptop is for development/training, not a mandatory inference server. Exact GPU, driver, dedicated VRAM, OS and available storage not measured.
