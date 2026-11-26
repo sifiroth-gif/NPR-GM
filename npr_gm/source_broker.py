@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import hashlib
 import re
+import subprocess
 from pathlib import PurePosixPath, Path
 from .npr_bridge import BridgeError, git, pin, blob_sha, SHA
 
@@ -26,7 +27,7 @@ def safe_path(path):
     if any(ord(c)<32 or ord(c)==127 or c in "\\:" for c in path):
         return False
     p=PurePosixPath(path)
-    return not p.is_absolute() and p.as_posix()==path and all(x not in (".","..",".git") and not x.startswith("-") for x in p.parts)
+    return bool(p.parts) and not p.is_absolute() and p.as_posix()==path and all(x.lower() not in (".","..",".git") and not x.startswith("-") for x in p.parts)
 
 class SourceBroker:
     """One broker per turn/snapshot. No path, line selector or revision from model.
@@ -42,6 +43,7 @@ class SourceBroker:
         self._remaining=budget
         self._grants={}
         self._read={}
+        self._blocked=False
         for g in grants:
             if not isinstance(g,Grant) or not isinstance(g.id,str) or not ID.fullmatch(g.id) or g.id in self._grants:
                 raise BridgeError("invalid_source_grant")
@@ -83,18 +85,20 @@ class SourceBroker:
         return tuple(sorted(self._read))
 
     def read(self,ident):
+        if self._blocked: raise BridgeError("source_broker_blocked")
         if not self._remaining: raise BridgeError("source_budget_exhausted")
         self._remaining-=1
         g=self._grants.get(ident) if isinstance(ident,str) else None
         if g is None or not g.player_visible: return {"status":"unavailable"}
         try:
             text=self._excerpt(g)
-        except (BridgeError,ValueError,OSError,TimeoutError):
+        except (BridgeError,ValueError,OSError,TimeoutError,subprocess.TimeoutExpired):
             return {"status":"unavailable"}
         self._read[g.id]=g.excerpt_sha256
         return {"status":"found","id":g.id,"text":text}
 
     def prefetch(self,required):
+        if self._blocked: raise BridgeError("source_broker_blocked")
         ids=tuple(required)
         if any(not isinstance(i,str) for i in ids) or len(set(ids))!=len(ids) or len(ids)>self._remaining:
             raise BridgeError("mandatory_source_budget_or_ids")
@@ -105,12 +109,15 @@ class SourceBroker:
         for i in sorted(ids):
             r=self.read(i)
             if r["status"]!="found":
-                # Caller must discard this broker/turn, not deliver a partial prompt.
+                # A partially failed batch invalidates the entire broker/turn.
+                self._blocked=True
+                self._read.clear()
                 raise BridgeError("mandatory_source_unavailable")
             results.append(r)
         return results
 
     def require_citations(self,cited,required):
+        if self._blocked: raise BridgeError("source_broker_blocked")
         if not isinstance(cited,list) or any(not isinstance(i,str) for i in cited) or len(set(cited))!=len(cited):
             raise BridgeError("invalid_source_citations")
         if not set(required)<=set(cited) or not set(cited)<=set(self._read):

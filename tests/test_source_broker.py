@@ -33,7 +33,7 @@ class SourceBrokerTests(unittest.TestCase):
         for g in (replace(self.grant,blob="f"*40),replace(self.grant,excerpt_sha256="f"*64),replace(self.grant,last=3)):
             self.assertEqual(self.broker(g).read("g1"),{"status":"unavailable"})
     def test_invalid_path_and_duplicate(self):
-        for p in ("../note.txt","/note.txt","a/../note.txt",".git/config","a\\b","a//b","a:1","-file"):
+        for p in (".","..","../note.txt","/note.txt","a/../note.txt",".git/config","a\\b","a//b","a:1","-file"):
             self.assertFalse(safe_path(p),p)
         with self.assertRaises(BridgeError): self.broker(self.grant,self.grant)
     def test_shared_budget_and_citations(self):
@@ -53,3 +53,11 @@ class SourceBrokerTests(unittest.TestCase):
             self.assertEqual(b.read_ids,())
     def test_unpinned_revision(self):
         with self.assertRaises(BridgeError): SourceBroker(self.root,"HEAD",[self.grant])
+
+    def test_partial_prefetch_failure_poison(self):
+        second=replace(self.grant,id="g2",excerpt_sha256="f"*64)
+        b=self.broker(self.grant,second)
+        with self.assertRaises(BridgeError): b.prefetch(["g1","g2"])
+        self.assertEqual(b.read_ids,())
+        with self.assertRaisesRegex(BridgeError,"source_broker_blocked"): b.read("g1")
+        with self.assertRaisesRegex(BridgeError,"source_broker_blocked"): b.require_citations([],[])
