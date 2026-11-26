@@ -1,6 +1,6 @@
 import unittest
 from argparse import Namespace
-from npr_gm.train_qlora import encode_messages,collate,validate_args,smoke_messages,local_input
+from npr_gm.train_qlora import encode_messages,encode_targets,collate,validate_args,smoke_messages,local_input
 
 class FakeTokenizer:
     def apply_chat_template(self, messages, **kwargs):
@@ -50,3 +50,25 @@ class TrainTests(unittest.TestCase):
     def test_structured_smoke_mixing(self):
         a=self.args();a.structured=True
         with self.assertRaises(ValueError):validate_args(a)
+
+    def test_context_dependent_template(self):
+        class Tokenizer:
+            def apply_chat_template(self,messages,**kwargs):
+                ids=[]
+                for i,m in enumerate(messages):
+                    role=m["role"]
+                    ids += [{"system":1,"user":2,"assistant":3}[role]]
+                    if role=="assistant" and i==len(messages)-1:ids.append(8)
+                    ids += [int(m["content"]),9]
+                if kwargs["add_generation_prompt"]:ids += [3,8]
+                return ids
+        messages=[{"role":r,"content":str(i+10)} for i,r in enumerate(["system","user","assistant","user","assistant"])]
+        with self.assertRaises(ValueError):encode_messages(Tokenizer(),messages,100)
+        a,b=encode_targets(Tokenizer(),messages,100)
+        self.assertEqual([x for x in a["labels"] if x!=-100],[12,9])
+        self.assertEqual([x for x in b["labels"] if x!=-100],[14,9])
+        self.assertNotIn(12,[x for x in b["labels"] if x!=-100])
+    def test_final_mask_rejects_bad_prefix(self):
+        class Bad(FakeTokenizer):
+            def apply_chat_template(self,messages,**kwargs):return [8] if len(messages)==2 else [1,2]
+        with self.assertRaises(ValueError):encode_targets(Bad(),smoke_messages()[0]["messages"],10)

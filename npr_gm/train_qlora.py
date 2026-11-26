@@ -55,6 +55,33 @@ def encode_messages(tokenizer, messages, max_length):
     if not any(x!=-100 for x in labels):raise ValueError("No assistant target")
     return {"input_ids":full,"attention_mask":[1]*len(full),"labels":labels}
 
+def encode_targets(tokenizer, messages, max_length):
+    """One exact final-assistant continuation per target; earlier turns are context.
+
+    Some templates re-render earlier assistant turns when a later user arrives.
+    Never derive their target positions from a later rendering.
+    """
+    roles=[m["role"] for m in messages]
+    if len(roles)<3 or len(roles)%2!=1 or roles[0]!="system" or roles[1:]!=["user","assistant"]*((len(roles)-1)//2):
+        raise ValueError("Expected system followed by user/assistant pairs")
+    def render(part,generation):
+        ids=tokenizer.apply_chat_template(part,tokenize=True,add_generation_prompt=generation,
+                                         enable_thinking=False,return_dict=False)
+        if not isinstance(ids,list) or not all(type(x) is int for x in ids):
+            raise ValueError("Tokenizer must return flat token IDs")
+        return ids
+    out=[]
+    for i in range(2,len(messages),2):
+        prefix=render(messages[:i],True)
+        full=render(messages[:i+1],False)
+        if full[:len(prefix)]!=prefix or len(full)<=len(prefix):
+            raise ValueError("Final target prefix mismatch; verify official chat template")
+        if len(full)>max_length:
+            raise ValueError("Example exceeds max_length; shorten reviewed context, never truncate")
+        out.append({"input_ids":full,"attention_mask":[1]*len(full),
+                    "labels":[-100]*len(prefix)+full[len(prefix):]})
+    return out
+
 def collate(rows,pad_id):
     size=max(len(r["input_ids"]) for r in rows)
     return {k:[r[k]+[fill]*(size-len(r[k])) for r in rows] for k,fill in
@@ -100,7 +127,7 @@ def run(a,rows):
     torch.manual_seed(a.seed);random.seed(a.seed)
     dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
     tok=AutoTokenizer.from_pretrained(a.model,revision=a.revision,trust_remote_code=False)
-    encoded=[encode_messages(tok,x["messages"],a.max_length) for x in rows]
+    encoded=[sample for x in rows for sample in encode_targets(tok,x["messages"],a.max_length)]
     if tok.pad_token_id is None:
         raise ValueError("Tokenizer has no pad token; inspect official config")
     config=BitsAndBytesConfig(load_in_4bit=True,bnb_4bit_quant_type="nf4",bnb_4bit_use_double_quant=True,bnb_4bit_compute_dtype=dtype)
@@ -149,7 +176,7 @@ def run(a,rows):
     tok.save_pretrained(out/"adapter")
     receipt={"status":"smoke_only_not_for_deployment" if a.smoke else "pilot_trained_not_evaluated",
         "model":a.model,"revision":a.revision,"steps":a.steps,"accum":a.accum,"seed":a.seed,"lr":a.lr,
-        "max_length":a.max_length,"examples":len(encoded),"losses":losses,"dtype":str(dtype),
+        "max_length":a.max_length,"dialogues":len(rows),"examples":len(encoded),"masking":"separate_final_assistant_continuations","losses":losses,"dtype":str(dtype),
         "training_contract":"structured_sandbox_1" if a.structured else "prose_or_smoke",
         "gpu":torch.cuda.get_device_name(),"vram_total":total,"vram_free_start":free,
         "peak_allocated":torch.cuda.max_memory_allocated(),"peak_reserved":torch.cuda.max_memory_reserved(),
