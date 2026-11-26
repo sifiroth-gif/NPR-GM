@@ -4,7 +4,7 @@ from npr_gm.sandbox import Sandbox,Source,Outcome,ContractError,encode,demo,pars
 
 class SandboxTests(unittest.TestCase):
     def setUp(self):
-        self.e=Sandbox(resources=4,clock=10,sources=[Source("public","Открытая запись."),Source("secret","Скрытый текст.",False)],
+        self.e=Sandbox(resources=4,clock=10,sources=[Source("public","Открытая запись."),Source("secret","Скрытый текст.",False),Source("elsewhere","Открытая, но недоступная здесь запись.")],
             outcomes=[Outcome("read",1,2,("public",),"Открытая запись прочитана."),Outcome("other",0,5,(),"Другой исход."),Outcome("expensive",5,0,(),"Недоступный исход.")])
         self.t=self.e.begin("Читаю запись.",["read"],budget=4)
     def candidate(self,**changes):
@@ -73,3 +73,12 @@ class SandboxTests(unittest.TestCase):
         self.assertEqual((self.e.resources,self.e.clock,self.e.revision),(3,12,1))
     def test_demo(self):
         self.assertEqual(demo()["clock"],102)
+
+    def test_public_but_out_of_scope(self):
+        self.assertNotIn("elsewhere",encode(self.e.context(self.t)))
+        self.assertEqual(self.e.request(self.t,encode({"tool":"read_source","id":"elsewhere"})),{"status":"unavailable"})
+    def test_host_authorizes_additional_public_source(self):
+        t=self.e.begin("Смотрю записи.",["read"],authorized_sources=["public","elsewhere"])
+        self.assertEqual(self.e.request(t,encode({"tool":"read_source","id":"elsewhere"}))["status"],"found")
+    def test_host_cannot_authorize_secret(self):
+        with self.assertRaises(ContractError): self.e.begin("Смотрю.",["read"],authorized_sources=["public","secret"])

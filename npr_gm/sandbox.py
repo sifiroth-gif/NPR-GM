@@ -6,7 +6,6 @@ Model requests never execute code, select arbitrary paths, or supply state delta
 from dataclasses import dataclass
 import hashlib
 import json
-from types import MappingProxyType
 
 class ContractError(ValueError):
     pass
@@ -50,6 +49,7 @@ class Turn:
     revision:int
     player:str
     outcome_ids:tuple
+    source_ids:tuple
 
 class Sandbox:
     def __init__(self, *, resources, clock, sources, outcomes):
@@ -71,7 +71,7 @@ class Sandbox:
         self._receipts={}
         self._serial=0
 
-    def begin(self, player, authorized_outcomes, *, budget=4):
+    def begin(self, player, authorized_outcomes, *, authorized_sources=None, budget=4):
         # Called by the trusted host only, after interpretation and mechanic resolution.
         if not isinstance(player,str) or not player.strip() or len(player)>4000:
             raise ContractError("invalid_player")
@@ -80,8 +80,12 @@ class Sandbox:
         ids=tuple(authorized_outcomes)
         if not ids or len(ids)!=len(set(ids)) or any(k not in self._outcomes for k in ids):
             raise ContractError("invalid_authorizations")
+        required={k for oid in ids for k in self._outcomes[oid].required_sources}
+        permitted=set(required if authorized_sources is None else authorized_sources)
+        if not required<=permitted or any(k not in self._sources or not self._sources[k].player_visible for k in permitted):
+            raise ContractError("invalid_source_authorizations")
         self._serial+=1
-        turn=Turn("t"+str(self._serial),self.revision,player,ids)
+        turn=Turn("t"+str(self._serial),self.revision,player,ids,tuple(sorted(permitted)))
         self._active[turn.id]={"turn":turn,"remaining":budget,"read":set()}
         return turn
 
@@ -95,7 +99,7 @@ class Sandbox:
         self._session(turn)
         return {"schema":"npr-gm-sandbox/1","turn_id":turn.id,"revision":turn.revision,
                 "player":turn.player,"resources":self.resources,"clock":self.clock,
-                "source_ids":sorted(k for k,v in self._sources.items() if v.player_visible),
+                "source_ids":list(turn.source_ids),
                 "authorized_outcomes":[{"id":k,"required_sources":list(self._outcomes[k].required_sources),
                   "cost":self._outcomes[k].cost,"minutes":self._outcomes[k].minutes,
                   "description":self._outcomes[k].public_text} for k in turn.outcome_ids]}
@@ -110,7 +114,7 @@ class Sandbox:
             raise ContractError("unsupported_tool")
         s=self._sources.get(req["id"])
         # Uniform miss for secret and absent IDs; never return hidden metadata.
-        if s is None or not s.player_visible: return {"status":"unavailable"}
+        if s is None or not s.player_visible or s.id not in turn.source_ids: return {"status":"unavailable"}
         session["read"].add(s.id)
         return {"status":"found","id":s.id,"text":s.text}
 
