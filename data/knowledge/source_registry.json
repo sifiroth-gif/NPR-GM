@@ -172,7 +172,7 @@
       "status": "conditional_review",
       "scope": "Agency factual text only; no multimedia or third-party content",
       "model_use": "pending_page_rights_and_expert_review",
-      "rights_review": "page_review_pending",
+      "rights_review": "page_text_review_candidate",
       "checked_on": "2026-11-27",
       "content_pages": [
         "https://www.cdc.gov/antibiotic-use/about/"

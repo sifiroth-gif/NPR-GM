@@ -64,7 +64,7 @@
       "content_pages": [
         "https://www.cdc.gov/antibiotic-use/about/"
       ],
-      "rights_review": "page_review_pending",
+      "rights_review": "page_text_review_candidate",
       "notes": "Generally US public domain; third-party and international exceptions; attribution, nonendorsement disclaimer, no logos or framing.",
       "model_use": "pending",
       "training_use": "pending"
