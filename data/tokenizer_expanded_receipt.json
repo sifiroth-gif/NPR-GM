@@ -1,0 +1,86 @@
+{
+  "model": "Qwen/Qwen3.5-4B",
+  "revision": "bbaaae1f57d79c7bf696d619ffbbb0c2c8e5ef98",
+  "packages": {
+    "transformers": "5.13.0",
+    "tokenizers": "0.22.2",
+    "huggingface-hub": "1.33.0",
+    "jinja2": "3.1.6"
+  },
+  "file_sha256": {
+    "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "merges.txt": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+    "chat_template.jinja": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+    "config.json": "ddc63e1c717afa86c865bb5e01313d89d72bb53b97ad4a8a03ba8510c0621670",
+    "vocab.json": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+  },
+  "dialogues": 16,
+  "legacy_full_mask_pass": 4,
+  "legacy_full_mask_fail": 12,
+  "separate_targets": 32,
+  "target_lengths_min_max": [
+    12,
+    91
+  ],
+  "input_min_median_max": [
+    255,
+    316.5,
+    477
+  ],
+  "over_512": 0,
+  "over_1024": 0,
+  "prefetch": {
+    "dialogues": 15,
+    "targets": 15,
+    "input_min_median_max": [
+      348,
+      390,
+      441
+    ],
+    "target_lengths_min_max": [
+      65,
+      91
+    ],
+    "over_512": 0,
+    "failures": []
+  },
+  "optional_prefetch": {
+    "dialogues": 8,
+    "targets": 15,
+    "input_min_median_max": [
+      332,
+      393,
+      545
+    ],
+    "target_lengths_min_max": [
+      13,
+      98
+    ],
+    "over_512": 1,
+    "over_1024": 0,
+    "failures": []
+  },
+  "literary": {
+    "dialogues": 6,
+    "targets": 6,
+    "input_min_median_max": [
+      317,
+      348.5,
+      362
+    ],
+    "target_lengths_min_max": [
+      166,
+      198
+    ],
+    "over_512": 0,
+    "over_1024": 0,
+    "failures": []
+  },
+  "smoke_input_tokens": 42,
+  "failures": [],
+  "weights_loaded": false,
+  "training": false,
+  "workflow_run": 45994921030,
+  "code_commit": "ecda9440bb0c48ab04107789eb43962aeaa7c958"
+}
