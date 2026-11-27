@@ -1,0 +1,74 @@
+{
+  "schema": "knowledge-source-candidates/1",
+  "checked_on": "2026-11-27",
+  "purpose": "Bibliographic inventory, not rights clearance or model input",
+  "sources": [
+    {
+      "id": "BIO-S10",
+      "domain": "Анатомия/физиология",
+      "title": "NHLBI — How the Heart Works / How the Lungs Work",
+      "policy_url": "https://www.nhlbi.nih.gov/about/contact/trademark-branding-and-logo",
+      "content_pages": [
+        "https://www.nhlbi.nih.gov/health/heart/anatomy",
+        "https://www.nhlbi.nih.gov/health/lungs/body-controls-breathing"
+      ],
+      "rights_review": "page_text_review_candidate",
+      "notes": "General US public-domain policy with exceptions; no modifications of formatted multimedia; attribution and no endorsement; exclude third-party images/videos.",
+      "model_use": "pending",
+      "training_use": "pending"
+    },
+    {
+      "id": "BIO-S11",
+      "domain": "Нейрофизиология",
+      "title": "NINDS — Brain Basics",
+      "policy_url": "https://www.ninds.nih.gov/publications/publications-help",
+      "content_pages": [
+        "https://www.ninds.nih.gov/health-information/public-education/brain-basics"
+      ],
+      "rights_review": "direct_policy_unverified",
+      "notes": "Search result indicates public-domain reuse; direct rights page returned HTTP 403. Do not clear based on snippet alone.",
+      "model_use": "pending",
+      "training_use": "pending"
+    },
+    {
+      "id": "BIO-S12",
+      "domain": "Психофизиология",
+      "title": "NCCIH — Stress",
+      "policy_url": "https://www.nccih.nih.gov/health/stress",
+      "content_pages": [
+        "https://www.nccih.nih.gov/health/stress"
+      ],
+      "rights_review": "page_text_review_candidate",
+      "notes": "Publication states public domain; use only original agency text; no implied endorsement; scope is introductory, not a clinical trial.",
+      "model_use": "pending",
+      "training_use": "pending"
+    },
+    {
+      "id": "BIO-S13",
+      "domain": "Биология",
+      "title": "NHGRI — DNA Fact Sheet",
+      "policy_url": "https://www.genome.gov/about-nhgri/Policies-Guidance/Copyright",
+      "content_pages": [
+        "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet"
+      ],
+      "rights_review": "page_text_review_candidate",
+      "notes": "Public domain unless otherwise marked; agency acknowledgement and link requested; exclude credited third-party works.",
+      "model_use": "pending",
+      "training_use": "pending"
+    },
+    {
+      "id": "BIO-S14",
+      "domain": "Медицина",
+      "title": "CDC — Antibiotic Prescribing and Use",
+      "policy_url": "https://www.cdc.gov/other/agencymaterials.html",
+      "content_pages": [
+        "https://www.cdc.gov/antibiotic-use/about/"
+      ],
+      "rights_review": "page_review_pending",
+      "notes": "Generally US public domain; third-party and international exceptions; attribution, nonendorsement disclaimer, no logos or framing.",
+      "model_use": "pending",
+      "training_use": "pending"
+    }
+  ],
+  "disclaimer": "Project use does not imply endorsement by NIH, CDC, HHS or the US government. US public domain does not establish worldwide status. No agency images or logos imported."
+}

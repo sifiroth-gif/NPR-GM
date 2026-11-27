@@ -1,6 +1,6 @@
 {
-  "version": "0.2",
-  "checked_on": "2026-11-26",
+  "version": "0.3",
+  "checked_on": "2026-11-27",
   "policy": "Human bibliographic review only by default. No automatic AI ingestion or training. Model-facing retrieval requires explicit affirmative source AND card permission, expert-reviewed card, and local documented evidence of permission and independent review. OpenStax current AI notice explicitly requires permission; do not ingest or extend using those editions pending resolution. Facts may be independently sourced from eligible primary material; no legal determination about all independently authored factual summaries.",
   "sources": [
     {
@@ -101,6 +101,82 @@
       "status": "policy",
       "scope": "Не считать все документы NCBI общественным достоянием",
       "model_use": "pending_page_rights_and_expert_review"
+    },
+    {
+      "id": "BIO-S10",
+      "domain": "Анатомия/физиология",
+      "title": "NHLBI — How the Heart Works / How the Lungs Work",
+      "url": "https://www.nhlbi.nih.gov/about/contact/trademark-branding-and-logo",
+      "rights": "General US public-domain policy with exceptions; no modifications of formatted multimedia; attribution and no endorsement; exclude third-party images/videos.",
+      "status": "conditional_review",
+      "scope": "Agency factual text only; no multimedia or third-party content",
+      "model_use": "pending_page_rights_and_expert_review",
+      "rights_review": "page_text_review_candidate",
+      "checked_on": "2026-11-27",
+      "content_pages": [
+        "https://www.nhlbi.nih.gov/health/heart/anatomy",
+        "https://www.nhlbi.nih.gov/health/lungs/body-controls-breathing"
+      ]
+    },
+    {
+      "id": "BIO-S11",
+      "domain": "Нейрофизиология",
+      "title": "NINDS — Brain Basics",
+      "url": "https://www.ninds.nih.gov/publications/publications-help",
+      "rights": "Search result indicates public-domain reuse; direct rights page returned HTTP 403. Do not clear based on snippet alone.",
+      "status": "conditional_review",
+      "scope": "Agency factual text only; no multimedia or third-party content",
+      "model_use": "pending_page_rights_and_expert_review",
+      "rights_review": "direct_policy_unverified",
+      "checked_on": "2026-11-27",
+      "content_pages": [
+        "https://www.ninds.nih.gov/health-information/public-education/brain-basics"
+      ]
+    },
+    {
+      "id": "BIO-S12",
+      "domain": "Психофизиология",
+      "title": "NCCIH — Stress",
+      "url": "https://www.nccih.nih.gov/health/stress",
+      "rights": "Publication states public domain; use only original agency text; no implied endorsement; scope is introductory, not a clinical trial.",
+      "status": "conditional_review",
+      "scope": "Agency factual text only; no multimedia or third-party content",
+      "model_use": "pending_page_rights_and_expert_review",
+      "rights_review": "page_text_review_candidate",
+      "checked_on": "2026-11-27",
+      "content_pages": [
+        "https://www.nccih.nih.gov/health/stress"
+      ]
+    },
+    {
+      "id": "BIO-S13",
+      "domain": "Биология",
+      "title": "NHGRI — DNA Fact Sheet",
+      "url": "https://www.genome.gov/about-nhgri/Policies-Guidance/Copyright",
+      "rights": "Public domain unless otherwise marked; agency acknowledgement and link requested; exclude credited third-party works.",
+      "status": "conditional_review",
+      "scope": "Agency factual text only; no multimedia or third-party content",
+      "model_use": "pending_page_rights_and_expert_review",
+      "rights_review": "page_text_review_candidate",
+      "checked_on": "2026-11-27",
+      "content_pages": [
+        "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet"
+      ]
+    },
+    {
+      "id": "BIO-S14",
+      "domain": "Медицина",
+      "title": "CDC — Antibiotic Prescribing and Use",
+      "url": "https://www.cdc.gov/other/agencymaterials.html",
+      "rights": "Generally US public domain; third-party and international exceptions; attribution, nonendorsement disclaimer, no logos or framing.",
+      "status": "conditional_review",
+      "scope": "Agency factual text only; no multimedia or third-party content",
+      "model_use": "pending_page_rights_and_expert_review",
+      "rights_review": "page_review_pending",
+      "checked_on": "2026-11-27",
+      "content_pages": [
+        "https://www.cdc.gov/antibiotic-use/about/"
+      ]
     }
   ]
 }
